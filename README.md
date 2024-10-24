@@ -3,6 +3,7 @@
 
 Raport zawiera przykładowe elementy wykonanej dokumentacji inżynierii wymagań.
 Członkowie zespołu:
+
 •	Macierz kompetencji zespołu.
 
 ![image](https://github.com/user-attachments/assets/75052f30-53a8-4870-ae2b-2dea4e9b5de7)
