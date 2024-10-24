@@ -2,6 +2,7 @@
 # Dokumentacja inżynierii wymagań
 
 Raport zawiera przykładowe elementy wykonanej dokumentacji inżynierii wymagań.
+
 Członkowie zespołu:
 
 •	Macierz kompetencji zespołu.
