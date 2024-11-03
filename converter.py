@@ -4,6 +4,9 @@ import ffmpeg
 import os
 from PIL import Image
 
+# Ustaw ścieżkę do ffmpeg
+os.environ["PATH"] += os.pathsep + r"C:\ffmpeg\ffmpeg-7.1-full_build\bin"  # Upewnij się, że to jest właściwa ścieżka
+
 
 class ConverterApp:
     def __init__(self, root):
@@ -26,7 +29,8 @@ class ConverterApp:
         self.format_label = tk.Label(root, text="Wybierz format docelowy:")
         self.format_label.pack(pady=10)
 
-        self.format_options = ["jpg", "png", "mp4", "mp3", "wav"]
+        # Dodajemy format 'mov' do opcji formatów
+        self.format_options = ["jpg", "png", "mp4", "mp3", "wav", "mov"]
         self.selected_format = tk.StringVar(root)
         self.selected_format.set(self.format_options[0])  # Domyślnie jpg
 
@@ -63,7 +67,7 @@ class ConverterApp:
                 self.convert_image(output_file, output_format)
             elif output_format in ["mp3", "wav"]:
                 self.convert_audio(output_file, output_format)
-            elif output_format in ["mp4"]:
+            elif output_format in ["mp4", "mov"]:
                 self.convert_video(output_file, output_format)
             messagebox.showinfo("Sukces", f"Plik został przekonwertowany do {output_format}")
         except Exception as e:
@@ -86,19 +90,33 @@ class ConverterApp:
 
     def convert_audio(self, output_file, format):
         """Konwersja pliku audio"""
-        print(f"Konwertowanie audio do formatu: {format}")
-        stream = ffmpeg.input(self.file_path)
-        stream = ffmpeg.output(stream, output_file)
-        ffmpeg.run(stream)
-        print(f"Audio zapisane jako: {output_file}")
+        try:
+            print(f"Konwertowanie audio do formatu: {format}")
+            stream = ffmpeg.input(self.file_path)
+            if format == "wav":
+                stream = ffmpeg.output(stream, output_file, format="wav")
+            elif format == "mp3":
+                stream = ffmpeg.output(stream, output_file, format="mp3")
+            ffmpeg.run(stream)
+            print(f"Audio zapisane jako: {output_file}")
+        except ffmpeg.Error as e:
+            print(f"Błąd podczas konwersji audio: {e.stderr.decode('utf8')}")
+            raise
 
     def convert_video(self, output_file, format):
         """Konwersja pliku wideo"""
-        print(f"Konwertowanie wideo do formatu: {format}")
-        stream = ffmpeg.input(self.file_path)
-        stream = ffmpeg.output(stream, output_file)
-        ffmpeg.run(stream)
-        print(f"Wideo zapisane jako: {output_file}")
+        try:
+            print(f"Konwertowanie wideo do formatu: {format}")
+            stream = ffmpeg.input(self.file_path)
+            if format == "mp4":
+                stream = ffmpeg.output(stream, output_file, format="mp4")
+            elif format == "mov":
+                stream = ffmpeg.output(stream, output_file, format="mov")
+            ffmpeg.run(stream)
+            print(f"Wideo zapisane jako: {output_file}")
+        except ffmpeg.Error as e:
+            print(f"Błąd podczas konwersji wideo: {e.stderr.decode('utf8')}")
+            raise
 
 
 if __name__ == "__main__":
