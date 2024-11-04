@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 import ffmpeg
 import os
+import shutil
 from PIL import Image
 
 # Ustaw ścieżkę do ffmpeg
@@ -44,8 +45,14 @@ class ConverterApp:
         self.convert_btn = tk.Button(root, text="Konwertuj", command=self.convert_file)
         self.convert_btn.pack(pady=20)
 
+        # Przycisk do pobrania pliku, początkowo wyłączony
+        self.download_btn = tk.Button(root, text="Pobierz", command=self.download_file, state="disabled")
+        self.download_btn.pack(pady=10)
+
         # Ścieżka do wybranego pliku
         self.file_path = None
+        # Ścieżka do przekonwertowanego pliku
+        self.output_file = None
 
     def load_file(self):
         """Funkcja ładuje plik wybrany przez użytkownika i sprawdza jego rozmiar oraz typ"""
@@ -60,6 +67,7 @@ class ConverterApp:
             else:
                 self.file_label.config(text=os.path.basename(self.file_path))
                 self.update_format_options(self.get_available_formats(self.file_path))
+                self.download_btn.config(state="disabled")  # Wyłącz przycisk "Pobierz" do czasu konwersji
 
     def get_available_formats(self, file_path):
         """Zwraca dostępne formaty docelowe w zależności od typu pliku"""
@@ -93,16 +101,17 @@ class ConverterApp:
             return
 
         output_format = self.selected_format.get()
-        output_file = os.path.splitext(self.file_path)[0] + f".{output_format}"
+        self.output_file = os.path.splitext(self.file_path)[0] + f".{output_format}"
 
         try:
             if output_format in IMAGE_FORMATS:
-                self.convert_image(output_file, output_format)
+                self.convert_image(self.output_file, output_format)
             elif output_format in AUDIO_FORMATS:
-                self.convert_audio(output_file, output_format)
+                self.convert_audio(self.output_file, output_format)
             elif output_format in VIDEO_FORMATS:
-                self.convert_video(output_file, output_format)
+                self.convert_video(self.output_file, output_format)
             messagebox.showinfo("Sukces", f"Plik został przekonwertowany do {output_format}")
+            self.download_btn.config(state="normal")  # Włącz przycisk "Pobierz" po zakończeniu konwersji
         except Exception as e:
             messagebox.showerror("Błąd", f"Nie udało się przekonwertować pliku: {str(e)}")
 
@@ -135,6 +144,18 @@ class ConverterApp:
             ffmpeg.run(stream)
         except ffmpeg.Error as e:
             raise
+
+    def download_file(self):
+        """Funkcja umożliwia zapisanie przekonwertowanego pliku w wybranej lokalizacji"""
+        if not self.output_file:
+            messagebox.showerror("Błąd", "Brak przekonwertowanego pliku do pobrania.")
+            return
+
+        download_path = filedialog.asksaveasfilename(defaultextension=os.path.splitext(self.output_file)[1],
+                                                     filetypes=[("Pliki", f"*{os.path.splitext(self.output_file)[1]}")])
+        if download_path:
+            shutil.copy(self.output_file, download_path)
+            messagebox.showinfo("Sukces", f"Plik został pobrany jako: {download_path}")
 
 
 if __name__ == "__main__":
