@@ -7,6 +7,12 @@ from PIL import Image
 # Ustaw ścieżkę do ffmpeg
 os.environ["PATH"] += os.pathsep + r"C:\ffmpeg\ffmpeg-7.1-full_build\bin"  # Upewnij się, że to jest właściwa ścieżka
 
+MAX_FILE_SIZE_MB = 200  # Maksymalny rozmiar pliku w MB
+
+# Słowniki formatów dostępnych dla każdego typu pliku
+IMAGE_FORMATS = ["jpg", "png", "gif"]
+AUDIO_FORMATS = ["mp3", "wav", "flac"]
+VIDEO_FORMATS = ["mp4", "mov"]
 
 class ConverterApp:
     def __init__(self, root):
@@ -29,12 +35,9 @@ class ConverterApp:
         self.format_label = tk.Label(root, text="Wybierz format docelowy:")
         self.format_label.pack(pady=10)
 
-        # Dodajemy format 'mov' do opcji formatów
-        self.format_options = ["jpg", "png", "mp4", "mp3", "wav", "mov"]
+        # Menu wyboru formatu (dynamicznie aktualizowane)
         self.selected_format = tk.StringVar(root)
-        self.selected_format.set(self.format_options[0])  # Domyślnie jpg
-
-        self.format_menu = tk.OptionMenu(root, self.selected_format, *self.format_options)
+        self.format_menu = tk.OptionMenu(root, self.selected_format, "")
         self.format_menu.pack(pady=5)
 
         # Przycisk do konwersji
@@ -45,10 +48,43 @@ class ConverterApp:
         self.file_path = None
 
     def load_file(self):
-        """Funkcja ładuje plik wybrany przez użytkownika"""
+        """Funkcja ładuje plik wybrany przez użytkownika i sprawdza jego rozmiar oraz typ"""
         self.file_path = filedialog.askopenfilename()
         if self.file_path:
-            self.file_label.config(text=os.path.basename(self.file_path))
+            file_size_mb = os.path.getsize(self.file_path) / (1024 * 1024)  # Rozmiar w MB
+            if file_size_mb > MAX_FILE_SIZE_MB:
+                messagebox.showerror("Błąd", f"Plik przekracza maksymalny rozmiar {MAX_FILE_SIZE_MB} MB!")
+                self.file_path = None  # Wyczyszczenie ścieżki, aby uniknąć konwersji dużego pliku
+                self.file_label.config(text="Nie wybrano pliku")
+                self.update_format_options([])  # Wyczyść opcje formatów
+            else:
+                self.file_label.config(text=os.path.basename(self.file_path))
+                self.update_format_options(self.get_available_formats(self.file_path))
+
+    def get_available_formats(self, file_path):
+        """Zwraca dostępne formaty docelowe w zależności od typu pliku"""
+        _, ext = os.path.splitext(file_path)
+        ext = ext.lower().replace(".", "")  # Przetworzenie rozszerzenia
+
+        if ext in IMAGE_FORMATS:
+            return [fmt for fmt in IMAGE_FORMATS if fmt != ext]
+        elif ext in AUDIO_FORMATS:
+            return [fmt for fmt in AUDIO_FORMATS if fmt != ext]
+        elif ext in VIDEO_FORMATS:
+            return [fmt for fmt in VIDEO_FORMATS if fmt != ext]
+        else:
+            messagebox.showerror("Błąd", "Nieobsługiwany typ pliku.")
+            return []
+
+    def update_format_options(self, formats):
+        """Aktualizuje dostępne opcje formatów docelowych w menu wyboru formatu"""
+        self.format_menu["menu"].delete(0, "end")
+        for fmt in formats:
+            self.format_menu["menu"].add_command(label=fmt, command=tk._setit(self.selected_format, fmt))
+        if formats:
+            self.selected_format.set(formats[0])  # Ustaw pierwszy format jako domyślny
+        else:
+            self.selected_format.set("")  # Wyczyść wybór formatu
 
     def convert_file(self):
         """Funkcja konwertuje plik do wybranego formatu"""
@@ -56,18 +92,15 @@ class ConverterApp:
             messagebox.showerror("Błąd", "Nie wybrano pliku do konwersji!")
             return
 
-        # Pobierz wybrany format
         output_format = self.selected_format.get()
         output_file = os.path.splitext(self.file_path)[0] + f".{output_format}"
 
-        print(f"Rozpoczynam konwersję: {self.file_path} do {output_file}")
-
         try:
-            if output_format in ["jpg", "png"]:
+            if output_format in IMAGE_FORMATS:
                 self.convert_image(output_file, output_format)
-            elif output_format in ["mp3", "wav"]:
+            elif output_format in AUDIO_FORMATS:
                 self.convert_audio(output_file, output_format)
-            elif output_format in ["mp4", "mov"]:
+            elif output_format in VIDEO_FORMATS:
                 self.convert_video(output_file, output_format)
             messagebox.showinfo("Sukces", f"Plik został przekonwertowany do {output_format}")
         except Exception as e:
@@ -76,46 +109,31 @@ class ConverterApp:
     def convert_image(self, output_file, format):
         """Konwersja pliku obrazu"""
         try:
-            print(f"Konwertowanie obrazu do formatu: {format}")
             img = Image.open(self.file_path)
-            print("Obraz został załadowany.")
             if format == "jpg":
-                img = img.convert("RGB")  # Usunięcie przezroczystości
-                print("Obraz przekonwertowany do RGB.")
-            img.save(output_file, "JPEG")  # Użyj "JPEG"
-            print(f"Obraz zapisany jako: {output_file}")
+                img = img.convert("RGB")  # Usunięcie przezroczystości dla JPEG
+                img.save(output_file, "JPEG")
+            else:
+                img.save(output_file, format.upper())  # png, gif, itp.
         except Exception as e:
-            print(f"Błąd podczas konwersji obrazu: {str(e)}")
             raise
 
     def convert_audio(self, output_file, format):
         """Konwersja pliku audio"""
         try:
-            print(f"Konwertowanie audio do formatu: {format}")
             stream = ffmpeg.input(self.file_path)
-            if format == "wav":
-                stream = ffmpeg.output(stream, output_file, format="wav")
-            elif format == "mp3":
-                stream = ffmpeg.output(stream, output_file, format="mp3")
+            stream = ffmpeg.output(stream, output_file, format=format)
             ffmpeg.run(stream)
-            print(f"Audio zapisane jako: {output_file}")
         except ffmpeg.Error as e:
-            print(f"Błąd podczas konwersji audio: {e.stderr.decode('utf8')}")
             raise
 
     def convert_video(self, output_file, format):
         """Konwersja pliku wideo"""
         try:
-            print(f"Konwertowanie wideo do formatu: {format}")
             stream = ffmpeg.input(self.file_path)
-            if format == "mp4":
-                stream = ffmpeg.output(stream, output_file, format="mp4")
-            elif format == "mov":
-                stream = ffmpeg.output(stream, output_file, format="mov")
+            stream = ffmpeg.output(stream, output_file, format=format)
             ffmpeg.run(stream)
-            print(f"Wideo zapisane jako: {output_file}")
         except ffmpeg.Error as e:
-            print(f"Błąd podczas konwersji wideo: {e.stderr.decode('utf8')}")
             raise
 
 
