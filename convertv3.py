@@ -5,16 +5,16 @@ import os
 import threading
 from PIL import Image
 import subprocess
+import shutil
 import time
 
-MAX_FILE_SIZE_MB = 200
+MAX_FILE_SIZE_MB = 201
 QUALITY = 80
 
 # Obsługiwane formaty
 IMAGE_FORMATS = ["jpg", "png", "gif"]
 AUDIO_FORMATS = ["mp3", "wav", "flac"]
 VIDEO_FORMATS = ["mp4", "mov"]
-
 
 class ConverterApp:
     def __init__(self, root):
@@ -127,11 +127,13 @@ class ConverterApp:
             img.save(output_file, format.upper())
 
     def convert_audio(self, output_file, format):
-        command = ["ffmpeg", "-i", self.file_path, "-q:a", "2", output_file]
+        # Ustaw wyższy bitrate dla lepszej jakości
+        command = ["ffmpeg", "-i", self.file_path, "-b:a", "256k", output_file]
         subprocess.run(command, check=True)
 
     def convert_video(self, output_file, format):
-        command = ["ffmpeg", "-i", self.file_path, "-crf", "23", output_file]
+        # Ustaw niższy CRF dla wyższej jakości
+        command = ["ffmpeg", "-i", self.file_path, "-crf", "18", output_file]
         subprocess.run(command, check=True)
 
     def download_file(self):
@@ -144,7 +146,6 @@ class ConverterApp:
         if download_path:
             shutil.copy(self.output_file, download_path)
             messagebox.showinfo("Sukces", f"Plik został pobrany jako: {download_path}")
-
 
 if __name__ == "__main__":
     root = tk.Tk()
