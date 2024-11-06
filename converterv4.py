@@ -7,6 +7,7 @@ from PIL import Image
 import subprocess
 import shutil
 import time
+import tempfile  # Dodane do obsługi plików tymczasowych
 
 MAX_FILE_SIZE_MB = 201
 QUALITY = 80
@@ -45,7 +46,7 @@ class ConverterApp:
         self.download_btn.pack(pady=10)
 
         self.file_path = None
-        self.output_file = None
+        self.output_file = None  # Ścieżka do pliku tymczasowego
 
     def load_file(self):
         self.file_path = filedialog.askopenfilename()
@@ -95,27 +96,8 @@ class ConverterApp:
 
     def convert_file(self):
         output_format = self.selected_format.get()
-        base_output_file = os.path.splitext(self.file_path)[0] + f".{output_format}"
-        self.output_file = base_output_file
-
-        # Check if the output file already exists
-        if os.path.exists(self.output_file):
-            response = messagebox.askyesnocancel("Plik już istnieje",
-                                                 f"Plik {self.output_file} już istnieje. Czy chcesz go nadpisać?")
-            if response is None:
-                # User canceled
-                self.convert_btn.config(state="normal")  # Re-enable convert button
-                return
-            elif response is False:
-                # User chose to create a copy
-                new_name = filedialog.asksaveasfilename(defaultextension=f".{output_format}",
-                                                        initialfile=f"Kopia_{os.path.basename(self.output_file)}",
-                                                        filetypes=[("Pliki", f"*.{output_format}")])
-                if not new_name:
-                    # User canceled the save as dialog
-                    self.convert_btn.config(state="normal")
-                    return
-                self.output_file = new_name
+        # Ścieżka tymczasowa do przechowywania przekonwertowanego pliku
+        self.output_file = os.path.join(tempfile.gettempdir(), f"converted_file.{output_format}")
 
         try:
             if output_format in IMAGE_FORMATS:
@@ -125,18 +107,18 @@ class ConverterApp:
             elif output_format in VIDEO_FORMATS:
                 self.convert_video(self.output_file, output_format)
 
-            # Simulate progress bar update during conversion
+            # Symulacja aktualizacji paska postępu
             for i in range(1, 101):
                 self.progress_bar["value"] = i
-                time.sleep(0.05)  # Short delay to simulate processing
+                time.sleep(0.05)
 
             messagebox.showinfo("Sukces", f"Plik został przekonwertowany na {output_format}")
-            self.download_btn.config(state="normal")  # Enable download button
+            self.download_btn.config(state="normal")  # Aktywacja przycisku "Pobierz"
         except Exception as e:
             messagebox.showerror("Błąd", f"Nie udało się przekonwertować pliku: {str(e)}")
         finally:
-            self.progress_bar.stop()  # Stop progress bar
-            self.convert_btn.config(state="normal")  # Re-enable convert button
+            self.progress_bar.stop()  # Zatrzymanie paska postępu
+            self.convert_btn.config(state="normal")  # Ponowne włączenie przycisku konwersji
 
     def convert_image(self, output_file, format):
         img = Image.open(self.file_path)
@@ -147,12 +129,10 @@ class ConverterApp:
             img.save(output_file, format.upper())
 
     def convert_audio(self, output_file, format):
-        # Ustaw wyższy bitrate dla lepszej jakości
         command = ["ffmpeg", "-i", self.file_path, "-b:a", "256k", output_file]
         subprocess.run(command, check=True)
 
     def convert_video(self, output_file, format):
-        # Ustaw niższy CRF dla wyższej jakości
         command = ["ffmpeg", "-i", self.file_path, "-crf", "18", output_file]
         subprocess.run(command, check=True)
 
