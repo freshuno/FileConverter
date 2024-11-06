@@ -27,7 +27,8 @@ Członkowie zespołu:
 
 •	Przedstawienie modelowanego systemu za pomocą diagramów UML
 
- ![image](https://github.com/user-attachments/assets/0e873701-b18b-42d3-a14d-542dd2c74b04)
+![image](https://github.com/user-attachments/assets/a171e549-169a-4876-916d-e8a68ff58afd)
+
 
 
 Rys. 1 Diagram przypadków użycia
