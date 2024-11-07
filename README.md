@@ -11,19 +11,32 @@ https://github.com/BtbN/FFmpeg-Builds/releases
 Po pobraniu należy stworzyć folder ffmpeg na dysku C
 
 ![image](https://github.com/user-attachments/assets/817b9cce-c267-457a-bfdd-0f45b745f629)
+
 Rozpakować w tym folderze pobrany wcześniej przez nas plik ffmpeg-master-latest-win64-gpl.zip
+
 ![image](https://github.com/user-attachments/assets/f6db0380-2aa9-4fbf-8906-816df3dc5ee8)
+
 Kopiujemy ścieżke do pliku bin 
+
 ![image](https://github.com/user-attachments/assets/285e376d-b3ee-45e4-bb23-0b7e6dc76479)
+
 C:\ffmpeg\ffmpeg-master-latest-win64-gpl\bin
 Otwieramy zmienne środowiskowe
+
 ![image](https://github.com/user-attachments/assets/43efda13-0636-42c3-99fd-fcae4803f778)
+
 Klikamy zmienne środowiskowe 
+
 ![image](https://github.com/user-attachments/assets/75eb6590-07d1-4030-bcd5-31494ecb7c01)
+
 Edytujemy PATH
+
 ![image](https://github.com/user-attachments/assets/ce75f44b-cfa9-403f-8cbe-3accf37994fa)
+
 Klikamy NEW i dodajemy naszą ścieżkę C:\ffmpeg\ffmpeg-master-latest-win64-gpl\bin
+
 ![image](https://github.com/user-attachments/assets/e01b9908-8710-4a4e-8dff-db3186822b1f)
+
 Klikamy OK OK 
 
 
