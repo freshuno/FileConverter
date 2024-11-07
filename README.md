@@ -7,7 +7,9 @@
 Ponadto należy pobrać z tej strony plik o nazwie ffmpeg-master-latest-win64-gpl.zip
 https://github.com/BtbN/FFmpeg-Builds/releases
 ![image](https://github.com/user-attachments/assets/665c460f-4b90-4afe-b88a-b2b7266bd15f)
+
 Po pobraniu należy stworzyć folder ffmpeg na dysku C
+
 ![image](https://github.com/user-attachments/assets/817b9cce-c267-457a-bfdd-0f45b745f629)
 Rozpakować w tym folderze pobrany wcześniej przez nas plik ffmpeg-master-latest-win64-gpl.zip
 ![image](https://github.com/user-attachments/assets/f6db0380-2aa9-4fbf-8906-816df3dc5ee8)
