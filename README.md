@@ -21,6 +21,7 @@ Kopiujemy ścieżke do pliku bin
 ![image](https://github.com/user-attachments/assets/285e376d-b3ee-45e4-bb23-0b7e6dc76479)
 
 C:\ffmpeg\ffmpeg-master-latest-win64-gpl\bin
+
 Otwieramy zmienne środowiskowe
 
 ![image](https://github.com/user-attachments/assets/43efda13-0636-42c3-99fd-fcae4803f778)
