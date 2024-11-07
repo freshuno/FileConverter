@@ -1,6 +1,9 @@
 Żeby odpalić aplikacje należy wpisać w terminalu:
-pip install pillow
-pip install ffmpeg
+
+- pip install pillow
+- 
+- pip install ffmpeg
+- 
 Ponadto należy pobrać z tej strony plik o nazwie ffmpeg-master-latest-win64-gpl.zip
 https://github.com/BtbN/FFmpeg-Builds/releases
 ![image](https://github.com/user-attachments/assets/665c460f-4b90-4afe-b88a-b2b7266bd15f)
